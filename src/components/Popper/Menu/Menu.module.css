@@ -1,0 +1,24 @@
+.wrapper {
+    width: 224px;
+}
+
+.menu-items {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-items .menu-item {
+    margin-left: 0;
+    padding: 14px 8px;
+    width: 100%;
+    text-align: left;
+}
+
+.menu-item {
+    border-radius: 0;
+    font-weight: 600;
+}
+
+.menu-item:hover {
+    background-color: rgba(22, 24, 35, 0.03);
+}

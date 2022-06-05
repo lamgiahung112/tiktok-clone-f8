@@ -2,14 +2,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCircleXmark, faSpinner } from "@fortawesome/free-solid-svg-icons"
 import HeadlessTippy from "@tippyjs/react/headless"
 import "tippy.js/dist/tippy.css"
+import { useEffect, useRef, useState } from "react"
 
+import * as searchService from "~/services/searchService"
 import { Wrapper as PopperWrapper } from "~/components/Popper"
 import styles from "./Search.module.css"
 import classNames from "classnames/bind"
 
 import AccountItem from "~/components/AccountItem"
 import { SearchIcon } from "~/components/Icons"
-import { useEffect, useRef, useState } from "react"
+import { useDebounce } from "~/hooks"
 
 const cx = classNames.bind(styles)
 
@@ -19,26 +21,23 @@ function Search() {
     const [showResult, setShowResult] = useState(true)
     const [loading, setLoading] = useState(false)
 
+    const debounced = useDebounce(searchValue, 500)
+
     useEffect(() => {
-        if (!searchValue.trim()) {
+        if (!debounced.trim()) {
             setSearchResults([])
             return
         }
 
-        setLoading(true)
+        const fetchAPI = async () => {
+            setLoading(true)
+            const data = await searchService.search(debounced)
+            setSearchResults(data)
+            setLoading(false)
+        }
 
-        fetch(
-            `https://tiktok.fullstack.edu.vn/api/users/search?q=${encodeURIComponent(
-                searchValue
-            )}&type=less`
-        )
-            .then((res) => res.json())
-            .then((res) => {
-                setSearchResults(res.data)
-                setLoading(false)
-            })
-            .catch(() => setLoading(false))
-    }, [searchValue])
+        fetchAPI()
+    }, [debounced])
 
     const inputRef = useRef()
 

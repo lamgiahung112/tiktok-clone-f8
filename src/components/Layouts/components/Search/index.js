@@ -17,10 +17,28 @@ function Search() {
     const [searchValue, setSearchValue] = useState("")
     const [searchResults, setSearchResults] = useState([])
     const [showResult, setShowResult] = useState(true)
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        setTimeout(() => setSearchResults([1, 2, 3]), 0)
-    }, [])
+        if (!searchValue.trim()) {
+            setSearchResults([])
+            return
+        }
+
+        setLoading(true)
+
+        fetch(
+            `https://tiktok.fullstack.edu.vn/api/users/search?q=${encodeURIComponent(
+                searchValue
+            )}&type=less`
+        )
+            .then((res) => res.json())
+            .then((res) => {
+                setSearchResults(res.data)
+                setLoading(false)
+            })
+            .catch(() => setLoading(false))
+    }, [searchValue])
 
     const inputRef = useRef()
 
@@ -43,9 +61,9 @@ function Search() {
                 <div className={cx("search-results")} tabIndex="-1" {...attrs}>
                     <PopperWrapper>
                         <h4 className={cx("search-title")}>Accounts</h4>
-                        <AccountItem />
-                        <AccountItem />
-                        <AccountItem />
+                        {searchResults.map((result) => (
+                            <AccountItem key={result.id} data={result} />
+                        ))}
                     </PopperWrapper>
                 </div>
             )}
@@ -60,12 +78,17 @@ function Search() {
                     onChange={(e) => setSearchValue(e.target.value)}
                     spellCheck={false}
                 />
-                {!!searchValue && (
+                {!!searchValue && !loading && (
                     <button className={cx("clear")} onClick={handleClear}>
                         <FontAwesomeIcon icon={faCircleXmark} />
                     </button>
                 )}
-                <FontAwesomeIcon className={cx("spinner")} icon={faSpinner} />
+                {loading && (
+                    <FontAwesomeIcon
+                        className={cx("spinner")}
+                        icon={faSpinner}
+                    />
+                )}
 
                 <button className={cx("search-btn")}>
                     <SearchIcon />
